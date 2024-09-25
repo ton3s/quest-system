@@ -62,6 +62,7 @@ public class QuestManager : MonoBehaviour
 			{
 				// Debug.LogWarning("Prerequisite quest not completed: " + prerequisite.id);
 				meetsRequirements = false;
+				break;
 			}
 		}
 		return meetsRequirements;

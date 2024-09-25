@@ -104,12 +104,30 @@ public class QuestManager : MonoBehaviour
 	{
 		// TODO: Implement quest starting logic
 		Debug.Log("Starting quest with ID: " + questID);
+
+		Quest quest = GetQuestByID(questID);
+		quest.InstantiateCurrentQuestStep(transform);
+		ChangeQuestState(questID, QuestState.IN_PROGRESS);
 	}
 
 	private void AdvanceQuest(string questID)
 	{
 		// TODO: Implement quest advancing logic
 		Debug.Log("Advancing quest with ID: " + questID);
+
+		Quest quest = GetQuestByID(questID);
+		quest.MoveToNextStep();
+
+		// If there are more steps, instantiate the next step
+		if (quest.CurrentStepExists())
+		{
+			quest.InstantiateCurrentQuestStep(transform);
+		}
+		// If there are no more steps, finish the quest
+		else
+		{
+			ChangeQuestState(questID, QuestState.FINISHED);
+		}
 	}
 
 	private void FinishQuest(string questID)

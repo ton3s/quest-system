@@ -134,8 +134,17 @@ public class QuestManager : MonoBehaviour
 	{
 		// TODO: Implement quest finishing logic
 		Debug.Log("Finishing quest with ID: " + questID);
+
+		Quest quest = GetQuestByID(questID);
+		ClaimReward(quest);
+		ChangeQuestState(questID, QuestState.FINISHED);
 	}
 
+	private void ClaimReward(Quest quest)
+	{
+		GameEventsManager.instance.goldEvents.GoldGained(quest.info.goldReward);
+		GameEventsManager.instance.playerEvents.ExperienceGained(quest.info.experienceReward);
+	}
 
 	/// <summary>
 	/// Create a map of Quest objects using the QuestInfoSOs in the Resources/Quests folder

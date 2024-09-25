@@ -6,6 +6,9 @@ public class QuestManager : MonoBehaviour
 {
 	private Dictionary<string, Quest> questMap;
 
+	// Quest start requirements
+	private int currentPlayerLevel;
+
 	/// <summary>
 	/// Initialize the QuestManager by creating the quest map from the QuestInfoSOs
 	/// </summary>
@@ -20,6 +23,9 @@ public class QuestManager : MonoBehaviour
 		GameEventsManager.instance.questEvents.onStartQuest += StartQuest;
 		GameEventsManager.instance.questEvents.onAdvanceQuest += AdvanceQuest;
 		GameEventsManager.instance.questEvents.onFinishQuest += FinishQuest;
+
+		// Subscribe to the PlayerEvents
+		GameEventsManager.instance.playerEvents.onPlayerLevelChange += PlayerLevelChange;
 	}
 
 	private void OnDisable()
@@ -28,6 +34,37 @@ public class QuestManager : MonoBehaviour
 		GameEventsManager.instance.questEvents.onStartQuest -= StartQuest;
 		GameEventsManager.instance.questEvents.onAdvanceQuest -= AdvanceQuest;
 		GameEventsManager.instance.questEvents.onFinishQuest -= FinishQuest;
+
+		GameEventsManager.instance.playerEvents.onPlayerLevelChange -= PlayerLevelChange;
+	}
+
+	private void PlayerLevelChange(int newLevel)
+	{
+		currentPlayerLevel = newLevel;
+	}
+
+	private bool CheckRequirementsMet(Quest quest)
+	{
+		bool meetsRequirements = true;
+
+		// Check if the player level is high enough to start the quest
+		if (currentPlayerLevel < quest.info.levelRequirement)
+		{
+			// Debug.LogWarning("Player level is too low to start quest: " + quest.info.id);
+			meetsRequirements = false;
+		}
+
+		// Check if all quest prerequisites are completed
+		foreach (QuestInfoSO prerequisite in quest.info.questPrerequisites)
+		{
+			Quest prerequisiteQuest = GetQuestByID(prerequisite.id);
+			if (prerequisiteQuest.state != QuestState.FINISHED)
+			{
+				// Debug.LogWarning("Prerequisite quest not completed: " + prerequisite.id);
+				meetsRequirements = false;
+			}
+		}
+		return meetsRequirements;
 	}
 
 	private void Start()
@@ -36,6 +73,29 @@ public class QuestManager : MonoBehaviour
 		foreach (Quest quest in questMap.Values)
 		{
 			// Notify the GameEventsManager that the quest state has changed (initial state) for all quests
+			GameEventsManager.instance.questEvents.QuestStateChanged(quest);
+		}
+	}
+
+	private void Update()
+	{
+		// Loop through all quests and check if they can be started, advanced or finished
+		foreach (Quest quest in questMap.Values)
+		{
+			// Check if the quest is in a state where it can be started
+			if (quest.state == QuestState.REQUIREMENTS_NOT_MET && CheckRequirementsMet(quest))
+			{
+				ChangeQuestState(quest.info.id, QuestState.CAN_START);
+			}
+		}
+	}
+
+	private void ChangeQuestState(string id, QuestState state)
+	{
+		Quest quest = GetQuestByID(id);
+		if (quest != null)
+		{
+			quest.state = state;
 			GameEventsManager.instance.questEvents.QuestStateChanged(quest);
 		}
 	}

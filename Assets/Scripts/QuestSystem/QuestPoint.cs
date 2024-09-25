@@ -11,13 +11,20 @@ public class QuestPoint : MonoBehaviour
 	[Header("Quest")]
 	[SerializeField] private QuestInfoSO questInfoForPoint;
 
+	[Header("Config")]
+	[SerializeField] private bool startPoint = false;
+	[SerializeField] private bool finishPoint = false;
+
 	private bool playerIsNear = false;
 	private string questId;
 	private QuestState currentQuestState;
 
+	private QuestIcon questIcon;
+
 	private void Awake()
 	{
 		questId = questInfoForPoint.id;
+		questIcon = GetComponentInChildren<QuestIcon>();
 	}
 
 	private void OnEnable()
@@ -34,9 +41,17 @@ public class QuestPoint : MonoBehaviour
 
 	private void SubmitPressed()
 	{
-		if (playerIsNear)
-		{
+		if (!playerIsNear) return;
 
+		// Check if the player can start the quest
+		if (currentQuestState.Equals(QuestState.CAN_START) && startPoint)
+		{
+			GameEventsManager.instance.questEvents.StartQuest(questId);
+		}
+		// Check if the player can finish the quest
+		else if (currentQuestState.Equals(QuestState.CAN_FINISH) && finishPoint)
+		{
+			GameEventsManager.instance.questEvents.FinishQuest(questId);
 		}
 	}
 
@@ -46,6 +61,7 @@ public class QuestPoint : MonoBehaviour
 		if (quest.info.id == questId)
 		{
 			currentQuestState = quest.state;
+			questIcon.SetState(currentQuestState, startPoint, finishPoint);
 		}
 	}
 

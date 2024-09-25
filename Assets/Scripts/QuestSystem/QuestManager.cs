@@ -122,12 +122,14 @@ public class QuestManager : MonoBehaviour
 		// If there are more steps, instantiate the next step
 		if (quest.CurrentStepExists())
 		{
+			Debug.Log("Advancing to next step for quest with ID: " + questID);
 			quest.InstantiateCurrentQuestStep(transform);
 		}
 		// If there are no more steps, finish the quest
 		else
 		{
-			ChangeQuestState(questID, QuestState.FINISHED);
+			Debug.Log("No more steps for quest with ID: " + questID);
+			ChangeQuestState(questID, QuestState.CAN_FINISH);
 		}
 	}
 

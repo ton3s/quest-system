@@ -12,19 +12,56 @@ public class QuestManager : MonoBehaviour
 	private void Awake()
 	{
 		questMap = CreateQuestMap();
-
-		// Example of how to get a Quest object by ID
-		Quest quest = GetQuestByID("CollectCoinsQuest");
-		Debug.Log(quest.info.displayName);
-		Debug.Log(quest.info.levelRequirement);
-		Debug.Log(quest.state);
-		Debug.Log(quest.CurrentStepExists());
 	}
+
+	private void OnEnable()
+	{
+		// Subscribe to the QuestEvents
+		GameEventsManager.instance.questEvents.onStartQuest += StartQuest;
+		GameEventsManager.instance.questEvents.onAdvanceQuest += AdvanceQuest;
+		GameEventsManager.instance.questEvents.onFinishQuest += FinishQuest;
+	}
+
+	private void OnDisable()
+	{
+		// Unsubscribe from the QuestEvents
+		GameEventsManager.instance.questEvents.onStartQuest -= StartQuest;
+		GameEventsManager.instance.questEvents.onAdvanceQuest -= AdvanceQuest;
+		GameEventsManager.instance.questEvents.onFinishQuest -= FinishQuest;
+	}
+
+	private void Start()
+	{
+		// Broadcast the inital state or all quests on startup
+		foreach (Quest quest in questMap.Values)
+		{
+			// Notify the GameEventsManager that the quest state has changed (initial state) for all quests
+			GameEventsManager.instance.questEvents.QuestStateChanged(quest);
+		}
+	}
+
+	private void StartQuest(string questID)
+	{
+		// TODO: Implement quest starting logic
+		Debug.Log("Starting quest with ID: " + questID);
+	}
+
+	private void AdvanceQuest(string questID)
+	{
+		// TODO: Implement quest advancing logic
+		Debug.Log("Advancing quest with ID: " + questID);
+	}
+
+	private void FinishQuest(string questID)
+	{
+		// TODO: Implement quest finishing logic
+		Debug.Log("Finishing quest with ID: " + questID);
+	}
+
 
 	/// <summary>
 	/// Create a map of Quest objects using the QuestInfoSOs in the Resources/Quests folder
 	/// </summary>
-	/// <returns></returns>
 	private Dictionary<string, Quest> CreateQuestMap()
 	{
 		// Loads all QuestInfoSOs Scriptable Objects under the Assets/Resources/Quests folder

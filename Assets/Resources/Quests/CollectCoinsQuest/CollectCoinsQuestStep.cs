@@ -36,4 +36,10 @@ public class CollectCoinsQuestStep : QuestStep
 		string state = coinsCollected.ToString();
 		ChangeState(state);
 	}
+
+	protected override void SetQuestStepState(string state)
+	{
+		this.coinsCollected = System.Int32.Parse(state);
+		UpdateState();
+	}
 }

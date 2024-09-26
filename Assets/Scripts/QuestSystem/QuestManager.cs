@@ -77,6 +77,12 @@ public class QuestManager : MonoBehaviour
 		// Broadcast the inital state or all quests on startup
 		foreach (Quest quest in questMap.Values)
 		{
+			// Initalize any loaded quest steps
+			if (quest.state == QuestState.IN_PROGRESS)
+			{
+				quest.InstantiateCurrentQuestStep(transform);
+			}
+
 			// Notify the GameEventsManager that the quest state has changed (initial state) for all quests
 			GameEventsManager.instance.questEvents.QuestStateChanged(quest);
 		}
@@ -177,9 +183,9 @@ public class QuestManager : MonoBehaviour
 			{
 				Debug.LogWarning("Duplicate quest ID found: " + questInfo.id);
 			}
-			// Create a new Quest object and add it to the map
-			Quest newQuest = new Quest(questInfo);
-			idToQuestMap.Add(questInfo.id, newQuest);
+
+			// Load the quest and add it to the map
+			idToQuestMap.Add(questInfo.id, LoadQuest(questInfo));
 		}
 		return idToQuestMap;
 	}
@@ -218,5 +224,30 @@ public class QuestManager : MonoBehaviour
 		{
 			Debug.LogError("Failed to save quest with id " + quest.info.id + ": " + e);
 		}
+	}
+
+	private Quest LoadQuest(QuestInfoSO questInfo)
+	{
+		Quest quest = null;
+		try
+		{
+			// Load quest from saved data
+			if (PlayerPrefs.HasKey(questInfo.id))
+			{
+				string serializedData = PlayerPrefs.GetString(questInfo.id);
+				QuestData questData = JsonUtility.FromJson<QuestData>(serializedData);
+				quest = new Quest(questInfo, questData.state, questData.questStepIndex, questData.questStepStates);
+			}
+			// Create a new quest if no saved data exists
+			else
+			{
+				quest = new Quest(questInfo);
+			}
+		}
+		catch (System.Exception e)
+		{
+			Debug.LogError("Failed to load quest with id " + questInfo.id + ": " + e);
+		}
+		return quest;
 	}
 }

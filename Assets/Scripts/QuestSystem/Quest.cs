@@ -17,10 +17,25 @@ public class Quest
 		this.info = questInfo;
 		this.state = QuestState.REQUIREMENTS_NOT_MET;
 		this.currentQuestStepIndex = 0;
-		this.questStepStates = new QuestStepState[info.questSteps.Length];
+		this.questStepStates = new QuestStepState[info.questStepPrefabs.Length];
 		for (int i = 0; i < questStepStates.Length; i++)
 		{
 			questStepStates[i] = new QuestStepState();
+		}
+	}
+
+	public Quest(QuestInfoSO questInfo, QuestState questState, int currentQuestStepIndex, QuestStepState[] questStepStates)
+	{
+		this.info = questInfo;
+		this.state = questState;
+		this.currentQuestStepIndex = currentQuestStepIndex;
+		this.questStepStates = questStepStates;
+
+		// If the quest step states and prefabs are different lengths
+		// something has changed during development and the saved data is out of sync
+		if (questStepStates.Length != this.info.questStepPrefabs.Length)
+		{
+			Debug.LogWarning("Quest step states and prefabs are different lengths for quest: " + info.id);
 		}
 	}
 
@@ -32,7 +47,7 @@ public class Quest
 	public bool CurrentStepExists()
 	{
 		// Ensure the current step index is within the bounds of the quest steps
-		return currentQuestStepIndex < info.questSteps.Length;
+		return currentQuestStepIndex < info.questStepPrefabs.Length;
 	}
 
 	public void InstantiateCurrentQuestStep(Transform parentTransform)
@@ -42,7 +57,9 @@ public class Quest
 		{
 			Debug.Log("Instantiating quest step: " + questStepPrefab.name);
 			QuestStep questStep = Object.Instantiate(questStepPrefab, parentTransform).GetComponent<QuestStep>();
-			questStep.InitializeQuestStep(info.id, currentQuestStepIndex);
+
+			// Initialize the quest step with the quest ID, step index, and state
+			questStep.InitializeQuestStep(info.id, currentQuestStepIndex, questStepStates[currentQuestStepIndex].state);
 		}
 	}
 
@@ -51,7 +68,7 @@ public class Quest
 		GameObject questStepPrefab = null;
 		if (CurrentStepExists())
 		{
-			questStepPrefab = info.questSteps[currentQuestStepIndex];
+			questStepPrefab = info.questStepPrefabs[currentQuestStepIndex];
 		}
 		else
 		{

@@ -10,12 +10,18 @@ public class Quest
 	// Current state of the quest
 	public QuestState state;
 	private int currentQuestStepIndex;
+	private QuestStepState[] questStepStates;
 
 	public Quest(QuestInfoSO questInfo)
 	{
 		this.info = questInfo;
 		this.state = QuestState.REQUIREMENTS_NOT_MET;
 		this.currentQuestStepIndex = 0;
+		this.questStepStates = new QuestStepState[info.questSteps.Length];
+		for (int i = 0; i < questStepStates.Length; i++)
+		{
+			questStepStates[i] = new QuestStepState();
+		}
 	}
 
 	public void MoveToNextStep()
@@ -36,7 +42,7 @@ public class Quest
 		{
 			Debug.Log("Instantiating quest step: " + questStepPrefab.name);
 			QuestStep questStep = Object.Instantiate(questStepPrefab, parentTransform).GetComponent<QuestStep>();
-			questStep.InitializeQuestStep(info.id);
+			questStep.InitializeQuestStep(info.id, currentQuestStepIndex);
 		}
 	}
 
@@ -53,5 +59,24 @@ public class Quest
 			+ "there's no current step: Quest ID=" + info.id + ", Step Index=" + currentQuestStepIndex);
 		}
 		return questStepPrefab;
+	}
+
+	// Store the state of a quest step at a given index 
+	public void StoreQuestStepState(QuestStepState questStepState, int stepIndex)
+	{
+		if (stepIndex >= 0 && stepIndex < questStepStates.Length)
+		{
+			questStepStates[stepIndex] = questStepState;
+		}
+		else
+		{
+			Debug.LogWarning("Tried to store quest step state, but stepIndex was out of range: "
+			+ "Quest ID=" + info.id + ", Step Index=" + stepIndex);
+		}
+	}
+
+	public QuestData GetQuestData()
+	{
+		return new QuestData(state, currentQuestStepIndex, questStepStates);
 	}
 }

@@ -54,4 +54,17 @@ public class QuestEvents
 			onQuestStateChanged(quest);
 		}
 	}
+
+	// Event for quest changing state
+	public event Action<string, int, QuestStepState> onQuestStepStateChanged;
+
+	// Change the state of a quest
+	public void QuestStepStateChanged(string id, int stepIndex, QuestStepState questStepState)
+	{
+		// Check if the event has any subscribers
+		if (onQuestStepStateChanged != null)
+		{
+			onQuestStepStateChanged(id, stepIndex, questStepState);
+		}
+	}
 }

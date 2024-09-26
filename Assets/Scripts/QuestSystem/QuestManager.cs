@@ -24,6 +24,8 @@ public class QuestManager : MonoBehaviour
 		GameEventsManager.instance.questEvents.onAdvanceQuest += AdvanceQuest;
 		GameEventsManager.instance.questEvents.onFinishQuest += FinishQuest;
 
+		GameEventsManager.instance.questEvents.onQuestStepStateChanged += QuestStepStateChange;
+
 		// Subscribe to the PlayerEvents
 		GameEventsManager.instance.playerEvents.onPlayerLevelChange += PlayerLevelChange;
 	}
@@ -34,6 +36,8 @@ public class QuestManager : MonoBehaviour
 		GameEventsManager.instance.questEvents.onStartQuest -= StartQuest;
 		GameEventsManager.instance.questEvents.onAdvanceQuest -= AdvanceQuest;
 		GameEventsManager.instance.questEvents.onFinishQuest -= FinishQuest;
+
+		GameEventsManager.instance.questEvents.onQuestStepStateChanged -= QuestStepStateChanged;
 
 		GameEventsManager.instance.playerEvents.onPlayerLevelChange -= PlayerLevelChange;
 	}

@@ -19,11 +19,21 @@ public class CollectCoinsQuestStep : QuestStep
 
 	private void CoinCollected()
 	{
-		coinsCollected++;
+		if (coinsCollected < coinsToComplete)
+		{
+			coinsCollected++;
+			UpdateState();
+		}
 
 		if (coinsCollected >= coinsToComplete)
 		{
 			FinishQuestStep();
 		}
+	}
+
+	private void UpdateState()
+	{
+		string state = coinsCollected.ToString();
+		ChangeState(state);
 	}
 }

@@ -24,7 +24,7 @@ public class QuestManager : MonoBehaviour
 		GameEventsManager.instance.questEvents.onAdvanceQuest += AdvanceQuest;
 		GameEventsManager.instance.questEvents.onFinishQuest += FinishQuest;
 
-		GameEventsManager.instance.questEvents.onQuestStepStateChanged += QuestStepStateChange;
+		GameEventsManager.instance.questEvents.onQuestStepStateChanged += QuestStepStateChanged;
 
 		// Subscribe to the PlayerEvents
 		GameEventsManager.instance.playerEvents.onPlayerLevelChange += PlayerLevelChange;
@@ -153,6 +153,13 @@ public class QuestManager : MonoBehaviour
 		GameEventsManager.instance.playerEvents.ExperienceGained(quest.info.experienceReward);
 	}
 
+	private void QuestStepStateChanged(string id, int stepIndex, QuestStepState questStepState)
+	{
+		Quest quest = GetQuestByID(id);
+		quest.StoreQuestStepState(questStepState, stepIndex);
+		ChangeQuestState(id, quest.state);
+	}
+
 	/// <summary>
 	/// Create a map of Quest objects using the QuestInfoSOs in the Resources/Quests folder
 	/// </summary>
@@ -185,5 +192,21 @@ public class QuestManager : MonoBehaviour
 			Debug.LogWarning("Quest with ID " + questID + " not found in quest map.");
 		}
 		return quest;
+	}
+
+	private void OnApplicationQuit()
+	{
+		// Save the state of all quests when the application quits
+		foreach (Quest quest in questMap.Values)
+		{
+			QuestData questData = quest.GetQuestData();
+			Debug.Log(quest.info.id);
+			Debug.Log("state=" + questData.state);
+			Debug.Log("index=" + questData.questStepIndex);
+			foreach (QuestStepState stepState in questData.questStepStates)
+			{
+				Debug.Log("stepState=" + stepState.state);
+			}
+		}
 	}
 }

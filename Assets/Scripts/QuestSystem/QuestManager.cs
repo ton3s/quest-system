@@ -199,14 +199,24 @@ public class QuestManager : MonoBehaviour
 		// Save the state of all quests when the application quits
 		foreach (Quest quest in questMap.Values)
 		{
+			Debug.Log("Saving quest: " + quest.info.id);
+			SaveQuest(quest);
+		}
+	}
+
+	private void SaveQuest(Quest quest)
+	{
+		try
+		{
 			QuestData questData = quest.GetQuestData();
-			Debug.Log(quest.info.id);
-			Debug.Log("state=" + questData.state);
-			Debug.Log("index=" + questData.questStepIndex);
-			foreach (QuestStepState stepState in questData.questStepStates)
-			{
-				Debug.Log("stepState=" + stepState.state);
-			}
+			string serializedData = JsonUtility.ToJson(questData);
+			PlayerPrefs.SetString(quest.info.id, serializedData);
+
+			Debug.Log(serializedData);
+		}
+		catch (System.Exception e)
+		{
+			Debug.LogError("Failed to save quest with id " + quest.info.id + ": " + e);
 		}
 	}
 }
